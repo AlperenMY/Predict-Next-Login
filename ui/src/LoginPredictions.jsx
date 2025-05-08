@@ -7,7 +7,7 @@ function LoginPredictions() {
 
 	useEffect(() => {
 		axios
-			.get("http://localhost:3000/predictLogins")
+			.get(`${import.meta.env.VITE_API_URL}/predictLogins`)
 			.then((result) => {
 				setData(result.data.message);
 				setLoading(false);
