@@ -1,168 +1,107 @@
-# Predict Next Login
+# Login Prediction App
 
-Bu proje, kullanıcıların geçmiş login verilerini analiz ederek **bir sonraki olası login zamanını** tahmin etmeyi amaçlayan bir web uygulamasıdır.  
-Tahminler kullanıcı dostu bir arayüzde gösterilir ve hem basit algoritmalar hem de OpenAI desteğiyle yapılır.
+Bu repo, basit bir "login prediction" uygulamasını içerir.
 
-## Projenin Yapısı
+- **Backend**: Express.js (Node.js)
+- **Frontend**: React (Vite)
 
-- **Backend (API)**: Login verilerini analiz eder, tahminleri üretir.
-- **Frontend (UI)**: Kullanıcı arayüzü; tahmin sonuçlarını listeler.
+## Proje Yapısı
 
----
+root
+│
+├── api # Backend (Node.js + Express)
+│ └── package.json
+│
+└── ui # Frontend (React + Vite)
+└── package.json
 
-## Kullanılan Teknolojiler
+markdown
+Kopyala
+Düzenle
 
-### Backend
+## Deploy (Render.com)
 
-- **Node.js** + **Express**
-- **Axios** (API istekleri için)
-- **dotenv** (Ortam değişkenleri için)
-- **CORS**
-- **Nodemon** (Geliştirme sırasında otomatik yeniden başlatma için)
+### 🔥 Backend Deploy (api)
 
-### Frontend
+1. Render’a gir → **New → Web Service** seç
+2. Repo olarak `api` klasörünü seç
+3. **Build Command:**
+   npm install
 
-- **React 18** + **Vite**
-- **Axios** (API çağrıları için)
+markdown
+Kopyala
+Düzenle 4. **Start Command:**
+npm start
 
----
+markdown
+Kopyala
+Düzenle 5. Environment → `PORT` Render tarafından otomatik atanır
 
-## Kurulum ve Çalıştırma Adımları
+### 🔥 Frontend Deploy (ui)
 
-### 1) Backend Kurulumu
+1. Render’a gir → **New → Web Service** seç
+2. Repo olarak `ui` klasörünü seç
+3. **Build Command:**
+   npm install && npm run build
 
-Login tahmin API'sini başlatmak için:
+markdown
+Kopyala
+Düzenle 4. **Start Command:**
+npm run preview -- --port $PORT
 
-```bash
+yaml
+Kopyala
+Düzenle 5. Environment → `PORT` Render tarafından otomatik atanır
+
+6. `vite.config.js` dosyasında Render domainlerini izinli host olarak ekle:
+
+```js
+preview: {
+  port: 4173,
+  host: true,
+  allowedHosts: ['.onrender.com']
+}
+.env Kullanımı
+Frontend ile backend doğru konuşabilsin diye environment variable kullandık.
+
+Backend (api/.env)
+ini
+Kopyala
+Düzenle
+PORT=3000
+Frontend (ui/.env)
+ini
+Kopyala
+Düzenle
+VITE_API_URL=https://your-backend-service.onrender.com
+⚠️ VITE_ prefix’i zorunludur. Vite sadece VITE_ ile başlayan değişkenleri alır.
+
+Frontend Kod Örneği
+js
+Kopyala
+Düzenle
+import axios from 'axios';
+
+axios.get(`${import.meta.env.VITE_API_URL}/predictLogins`)
+  .then(response => {
+    console.log(response.data);
+  });
+Local Geliştirme
+Backend Çalıştırma
+bash
+Kopyala
+Düzenle
 cd api
 npm install
-```
-
-#### Ortam Değişkenleri
-
-Bir `.env` dosyası oluşturun ve içine aşağıdakini ekleyin:
-
-```
-OPENAI_API_KEY=YOUR_OPENAI_API_KEY_HERE
-```
-
-#### Backend’i Çalıştır
-
-```bash
 npm start
-```
+👉 http://localhost:3000 adresinde çalışır.
 
-API `http://localhost:3000` adresinde çalışır.  
-Frontend tarafı **http://localhost:5173** üzerinden API’ye bağlanır (CORS bu portu destekleyecek şekilde ayarlı).
-
----
-
-### 2) Frontend (UI) Kurulumu
-
-Web arayüzünü başlatmak için:
-
-```bash
+Frontend Çalıştırma
+bash
+Kopyala
+Düzenle
 cd ui
 npm install
-```
-
-#### Frontend’i Çalıştır
-
-```bash
 npm run dev
+👉 http://localhost:5173 adresinde çalışır.
 ```
-
-Arayüz genellikle `http://localhost:5173` adresinde açılır.
-
----
-
-## Nasıl Çalışır?
-
-- Kullanıcı login verileri `http://case-test-api.humanas.io` adresinden çekilir.
-- **Backend** tarafı, login zaman serisine 3 farklı yöntem uygular:
-  - Ortalama zaman aralığına göre tahmin
-  - Ortalama gün içi saatine göre tahmin
-  - **OpenAI (GPT-4.1-mini)** modeliyle tahmin
-- Sonuçlar **Frontend** tarafına JSON formatında döner ve kullanıcıya gösterilir.
-
----
-
-## API Endpointi
-
-```
-GET /predictLogins
-```
-
-#### Yanıt Formatı:
-
-```json
-{
-  "success": true,
-  "message": [
-    {
-      "id": 1,
-      "name": "John Doe",
-      "predictions": {
-        "last_login": "2025-05-08T12:00:00Z",
-        "average_interval": "2025-05-10T12:00:00Z",
-        "average_interval_acc": "85",
-        "average_time_of_day": "2025-05-10T09:30:00Z",
-        "average_time_of_day_acc": "80",
-        "ai_prediction": "2025-05-09T14:15:00Z"
-      }
-    },
-    ...
-  ]
-}
-```
-
----
-
-## Özel Yapılandırmalar
-
-- **CORS** ayarı, sadece `http://localhost:5173` adresinden gelen istekleri kabul eder.
-- OpenAI tahminleri için geçerli bir `OPENAI_API_KEY` gereklidir.
-- Frontend tarafı doğrudan backend’in `/predictLogins` endpointini çağırır.
-
----
-
-## Geliştirici Notları
-
-- Frontend `Vite` ile hızlı geliştirme deneyimi sunar.
-- Backend'teki `evaluatePredictionAccuracy` fonksiyonu, algoritmaların doğruluk oranını yüzdesel olarak hesaplar.
-- OpenAI API çağrısı sırasında `gpt-4.1-mini` modeli kullanılır.
-
----
-
-## Çalışma Portları
-
-| Bileşen         | Adres                 |
-| --------------- | --------------------- |
-| **Backend API** | http://localhost:3000 |
-| **Frontend UI** | http://localhost:5173 |
-
----
-
-## Lisans
-
-Bu proje **ISC Lisansı** ile lisanslanmıştır.
-
----
-
-## Yazar
-
-👤 Alperen Yılmaz  
-[GitHub Profilim](https://github.com/AlperenMY)
-
----
-
-## Kurulumdan Sonra Görülebilecek Hatalar
-
-- OpenAI API limiti aşılırsa `/predictLogins` yanıtı `ai_prediction: null` dönebilir.
-- API `case-test-api.humanas.io` erişilemezse, backend 500 hatası verir.
-
----
-
-## Katkı
-
-PR’ler ve geliştirme katkıları memnuniyetle kabul edilir. 🚀
